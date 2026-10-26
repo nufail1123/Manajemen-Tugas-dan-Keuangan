@@ -13,12 +13,14 @@ const get = <T>(url: string, params?: object) => api.get<T>(url, { params }).the
  * Pabrik mutation: setelah sukses -> invalidate semua key terkait + toast.
  * Transaksi/tagihan mempengaruhi ringkasan, jadi 'summary' ikut di-refetch.
  */
-function useCrud<TVars>(keys: string[], fn: (v: TVars) => Promise<unknown>, message: string) {
+export function useCrud<TVars>(keys: string[], fn: (v: TVars) => Promise<unknown>, message: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: fn,
     onSuccess: () => { keys.forEach((k) => qc.invalidateQueries({ queryKey: [k] })); toast.success(message) },
-    onError: () => toast.error('Terjadi kesalahan, coba lagi.'),
+    // Pesan dari backend ({error}) ditampilkan untuk kesalahan validasi/konflik (mis. nama kategori sudah ada)
+    onError: (e) => toast.error(isAxiosError(e) && [400, 409, 422].includes(e.response?.status ?? 0) && e.response?.data?.error
+      ? String(e.response.data.error) : 'Terjadi kesalahan, coba lagi.'),
   })
 }
 

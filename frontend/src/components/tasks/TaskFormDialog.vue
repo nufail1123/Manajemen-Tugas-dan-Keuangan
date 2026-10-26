@@ -10,7 +10,7 @@ import DatePicker from '@/components/ui/DatePicker.vue'
 import FormField from '@/components/ui/FormField.vue'
 import WaSwitch from '@/components/ui/WaSwitch.vue'
 import { taskSchema } from '@/lib/schemas'
-import { taskCategories } from '@/lib/categories'
+import { useCategoryMeta } from '@/queries/categories'
 import { inputClass, btnPrimary } from '@/lib/styles'
 import { useCreateTask, useUpdateTask } from '@/queries'
 import type { Task } from '@/types'
@@ -18,12 +18,14 @@ import type { Task } from '@/types'
 // Satu dialog untuk tambah DAN ubah: kirim `editing` untuk mode ubah
 const props = defineProps<{ editing?: Task | null }>()
 const open = defineModel<boolean>('open', { default: false })
+const { categories } = useCategoryMeta()
+const categoryOptions = computed(() => categories.value.map((c) => ({ value: c.name, label: c.name })))
 const create = useCreateTask()
 const update = useUpdateTask()
 const isPending = computed(() => create.isPending.value || update.isPending.value)
 
 const initial = () => ({
-  title: '', description: '', category: 'Frontend', url: '',
+  title: '', description: '', category: categories.value[0]?.name ?? '', url: '',
   dueDate: dayjs().add(1, 'day').format('YYYY-MM-DD'), remindH3: true, remindH1: true,
 })
 const fromTask = (t: Task) => ({
@@ -66,7 +68,7 @@ const onSubmit = handleSubmit(async (values) => {
       </FormField>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
         <FormField label="Kategori" :error="errors.category">
-          <BaseSelect v-model="category" :options="taskCategories.map((c) => ({ value: c, label: c }))" />
+          <BaseSelect v-model="category" :options="categoryOptions" placeholder="Pilih kategori" />
         </FormField>
         <FormField label="Jatuh Tempo" :error="errors.dueDate"><DatePicker v-model="dueDate" /></FormField>
       </div>

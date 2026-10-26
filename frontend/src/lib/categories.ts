@@ -28,7 +28,16 @@ export const txCategories: TxCategory[] = [
 ]
 export const catMeta = (v: string) => txCategories.find((c) => c.value === v) ?? txCategories[6]
 
-export const taskCategories = ['Q4 Roadmap', 'DevOps', 'Personal', 'Frontend', 'Strategy']
-export const taskTone: Record<string, Tone> = {
-  'Q4 Roadmap': 'primary', DevOps: 'secondary', Personal: 'neutral', Frontend: 'primary', Strategy: 'tertiary',
+// Kategori tugas bawaan (dipakai sebagai cadangan bila backend belum punya /task-categories).
+// Kategori buatan pengguna disimpan di backend dan dibaca lewat useTaskCategories().
+export const defaultTaskCategories: { name: string; tone: Tone }[] = [
+  { name: 'Q4 Roadmap', tone: 'primary' }, { name: 'DevOps', tone: 'secondary' }, { name: 'Personal', tone: 'neutral' },
+  { name: 'Frontend', tone: 'primary' }, { name: 'Strategy', tone: 'tertiary' },
+]
+export const categoryTones: Tone[] = ['primary', 'secondary', 'tertiary', 'neutral']
+// Warna titik pada pemilih warna (class utuh agar terdeteksi Tailwind)
+export const toneDot: Record<Tone, string> = {
+  primary: 'bg-primary', secondary: 'bg-secondary', tertiary: 'bg-tertiary', neutral: 'bg-outline',
 }
+export const MAX_TASK_CATEGORIES = 20
+export const ALL_CATEGORIES = 'Semua' // nilai filter "semua kategori" -> nama ini tidak boleh dipakai kategori

@@ -13,11 +13,21 @@ type TransactionHandler struct {
 }
 
 func (h *TransactionHandler) GetAll(c *fiber.Ctx) error {
-	month := c.Query("month") // misal: "2026-10"
-	query := h.DB.Order("date DESC")
+	userID := c.Locals("userID").(string)
+	month := c.Query("month")
+	category := c.Query("category")
+	search := c.Query("q")
+
+	query := h.DB.Where("user_id = ?", userID).Order("date DESC")
 
 	if month != "" {
 		query = query.Where("date LIKE ?", month+"%")
+	}
+	if category != "" {
+		query = query.Where("category = ?", category)
+	}
+	if search != "" {
+		query = query.Where("description LIKE ?", "%"+search+"%")
 	}
 
 	var transactions []models.Transaction
@@ -28,32 +38,65 @@ func (h *TransactionHandler) GetAll(c *fiber.Ctx) error {
 }
 
 func (h *TransactionHandler) Create(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(string)
+
 	var tx models.Transaction
 	if err := c.BodyParser(&tx); err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": "Payload invalid"})
 	}
 
 	tx.ID = uuid.New().String()
+	tx.UserID = userID // Wajib diisi
+
 	if err := h.DB.Create(&tx).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.Status(201).JSON(tx)
 }
 
-func (h *TransactionHandler) Delete(c *fiber.Ctx) error {
+func (h *TransactionHandler) Update(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(string)
 	id := c.Params("id")
-	if err := h.DB.Delete(&models.Transaction{}, "id = ?", id).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+
+	var payload map[string]interface{}
+	if err := c.BodyParser(&payload); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "Payload invalid"})
 	}
+
+	res := h.DB.Model(&models.Transaction{}).Where("id = ? AND user_id = ?", id, userID).Updates(payload)
+	if res.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": res.Error.Error()})
+	}
+	if res.RowsAffected == 0 {
+		return c.Status(404).JSON(fiber.Map{"error": "Transaksi tidak ditemukan"})
+	}
+
 	return c.SendStatus(204)
 }
+
+func (h *TransactionHandler) Delete(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(string)
+	id := c.Params("id")
+
+	res := h.DB.Where("id = ? AND user_id = ?", id, userID).Delete(&models.Transaction{})
+	if res.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": res.Error.Error()})
+	}
+	if res.RowsAffected == 0 {
+		return c.Status(404).JSON(fiber.Map{"error": "Transaksi tidak ditemukan"})
+	}
+
+	return c.SendStatus(204)
+}
+
 func (h *TransactionHandler) GetSummary(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(string)
 	month := c.Query("month")
 
 	var totalIncome, totalExpense int64
 
-	incomeQuery := h.DB.Model(&models.Transaction{}).Where("type = ?", "income")
-	expenseQuery := h.DB.Model(&models.Transaction{}).Where("type = ?", "expense")
+	incomeQuery := h.DB.Model(&models.Transaction{}).Where("user_id = ? AND type = ?", userID, "income")
+	expenseQuery := h.DB.Model(&models.Transaction{}).Where("user_id = ? AND type = ?", userID, "expense")
 
 	if month != "" {
 		incomeQuery = incomeQuery.Where("date LIKE ?", month+"%")
@@ -69,18 +112,7 @@ func (h *TransactionHandler) GetSummary(c *fiber.Ctx) error {
 		"balance":      balance,
 		"totalIncome":  totalIncome,
 		"totalExpense": totalExpense,
+		"income":       totalIncome,
+		"expense":      totalExpense,
 	})
-}
-
-func (h *TransactionHandler) Update(c *fiber.Ctx) error {
-	id := c.Params("id")
-	var payload map[string]interface{}
-	if err := c.BodyParser(&payload); err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": "Payload invalid"})
-	}
-
-	if err := h.DB.Model(&models.Transaction{}).Where("id = ?", id).Updates(payload).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
-	}
-	return c.SendStatus(204)
 }

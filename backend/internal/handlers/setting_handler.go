@@ -13,26 +13,41 @@ type SettingHandler struct {
 }
 
 func (h *SettingHandler) GetWa(c *fiber.Ctx) error {
-	var setting models.Setting
-	h.DB.Where("setting_key = ?", "wa_number").First(&setting)
-	return c.JSON(models.WaSettingResponse{WaNumber: setting.Value})
+	userID := c.Locals("userID").(string)
+
+	var setting models.UserSetting
+	if err := h.DB.Where("user_id = ?", userID).First(&setting).Error; err != nil {
+		return c.JSON(fiber.Map{"waNumber": ""})
+	}
+	return c.JSON(fiber.Map{"waNumber": setting.WaNumber})
 }
 
 func (h *SettingHandler) UpdateWa(c *fiber.Ctx) error {
-	var req models.WaSettingResponse
+	userID := c.Locals("userID").(string)
+
+	type WaReq struct {
+		WaNumber string `json:"waNumber"`
+	}
+	var req WaReq
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": "Payload invalid"})
 	}
 
-	// Normalisasi otomatis jika diawali '0' atau '+62'
 	cleanPhone := strings.TrimSpace(req.WaNumber)
 	if strings.HasPrefix(cleanPhone, "+62") {
 		cleanPhone = cleanPhone[1:]
 	} else if strings.HasPrefix(cleanPhone, "0") {
 		cleanPhone = "62" + cleanPhone[1:]
 	}
-	req.WaNumber = cleanPhone
 
-	h.DB.Model(&models.Setting{}).Where("setting_key = ?", "wa_number").Update("value", req.WaNumber)
-	return c.JSON(req)
+	setting := models.UserSetting{
+		UserID:   userID,
+		WaNumber: cleanPhone,
+	}
+
+	if err := h.DB.Save(&setting).Error; err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Gagal menyimpan nomor WA"})
+	}
+
+	return c.JSON(fiber.Map{"waNumber": cleanPhone})
 }

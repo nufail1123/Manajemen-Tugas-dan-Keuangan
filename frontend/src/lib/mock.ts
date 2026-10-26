@@ -1,11 +1,14 @@
 // API palsu berbasis localStorage supaya frontend bisa jalan tanpa backend Go.
 // Matikan dengan VITE_USE_MOCK=false di .env
-import type { AxiosAdapter, InternalAxiosRequestConfig } from 'axios'
+import { AxiosError, type AxiosAdapter, type InternalAxiosRequestConfig } from 'axios'
 import dayjs from 'dayjs'
+import { defaultTaskCategories, MAX_TASK_CATEGORIES } from './categories'
 
 type Row = { id: string; [k: string]: unknown }
-interface DB { tasks: Row[]; transactions: Row[]; bills: Row[]; settings: { waNumber: string } }
-const KEY = 'taskflow-mock-db-v2'
+interface DB { tasks: Row[]; transactions: Row[]; bills: Row[]; taskCategories: Row[]; settings: { waNumber: string } }
+const USERS_KEY = 'taskflow-mock-users-v1'
+const dbKey = (userId: string) => `taskflow-mock-db-v3:${userId}`
+interface MockUser { id: string; name: string; email: string; password: string }
 const uid = () => Math.random().toString(36).slice(2, 10)
 
 function seed(): DB {
@@ -36,14 +39,33 @@ function seed(): DB {
       { id: uid(), name: 'Internet & WiFi Fiber', amount: 350000, day: 5, remindH3: true, remindH1: true },
       { id: uid(), name: 'Spotify & Netflix Bundle', amount: 180000, day: 12, remindH3: true, remindH1: true },
     ],
+    taskCategories: defaultTaskCategories.map((c) => ({ id: uid(), ...c })),
     settings: { waNumber: '6281290110000' },
   }
 }
-const load = (): DB => {
-  try { const raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw) } catch { /* abaikan */ }
-  const db = seed(); localStorage.setItem(KEY, JSON.stringify(db)); return db
+const loadUsers = (): MockUser[] => { try { return JSON.parse(localStorage.getItem(USERS_KEY) ?? '[]') } catch { return [] } }
+const saveUsers = (u: MockUser[]) => localStorage.setItem(USERS_KEY, JSON.stringify(u))
+// Setiap akun punya data sendiri (akun baru diisi data contoh agar tampilan tidak kosong)
+const load = (userId: string): DB => {
+  try {
+    const raw = localStorage.getItem(dbKey(userId))
+    if (raw) {
+      const db = JSON.parse(raw) as DB
+      // Data lama (sebelum ada kategori kustom): isi kategori bawaan + kategori yang sudah dipakai tugas
+      if (!db.taskCategories) {
+        const names = new Set<string>(defaultTaskCategories.map((c) => c.name))
+        db.tasks.forEach((t) => t.category && names.add(String(t.category)))
+        db.taskCategories = [...names].map((name) => ({ id: uid(), name, tone: defaultTaskCategories.find((c) => c.name === name)?.tone ?? 'neutral' }))
+        localStorage.setItem(dbKey(userId), JSON.stringify(db))
+      }
+      return db
+    }
+  } catch { /* abaikan */ }
+  const db = seed(); localStorage.setItem(dbKey(userId), JSON.stringify(db)); return db
 }
-const save = (db: DB) => localStorage.setItem(KEY, JSON.stringify(db))
+const save = (userId: string, db: DB) => localStorage.setItem(dbKey(userId), JSON.stringify(db))
+const publicUser = ({ password: _p, ...u }: MockUser) => u
+const tokenFor = (u: MockUser) => `mock.${u.id}`
 
 function summarize(db: DB, month: string) {
   const txs = db.transactions.filter((t) => String(t.date).startsWith(month))
@@ -67,34 +89,101 @@ function summarize(db: DB, month: string) {
 
 export const mockAdapter: AxiosAdapter = async (config) => {
   await new Promise((r) => setTimeout(r, 200)) // simulasi latensi jaringan
-  const db = load()
   const method = (config.method ?? 'get').toLowerCase()
   const path = (config.url ?? '').replace(/^\/api/, '')
   const body = config.data ? JSON.parse(config.data) : {}
-  const respond = (data: unknown, status = 200) =>
-    ({ data, status, statusText: 'OK', headers: {}, config: config as InternalAxiosRequestConfig, request: {} })
+  const cfg = config as InternalAxiosRequestConfig
+  const respond = (data: unknown, status = 200) => ({ data, status, statusText: 'OK', headers: {}, config: cfg, request: {} })
+  // Adapter kustom harus menolak sendiri untuk status error (seperti yang dilakukan axios pada HTTP sungguhan)
+  const fail = (status: number, error: string): never => {
+    throw new AxiosError(error, String(status), cfg, null, { data: { error }, status, statusText: String(status), headers: {}, config: cfg })
+  }
 
+  // ---- Autentikasi (publik)
+  if (path === '/auth/register' && method === 'post') {
+    const { name, email, password } = body
+    if (!name || !email || !password) fail(400, 'Data tidak lengkap')
+    const users = loadUsers()
+    if (users.some((u) => u.email.toLowerCase() === String(email).toLowerCase())) fail(409, 'Email sudah terdaftar')
+    const user: MockUser = { id: uid(), name, email: String(email).toLowerCase(), password }
+    saveUsers([...users, user])
+    return respond({ token: tokenFor(user), user: publicUser(user) }, 201)
+  }
+  if (path === '/auth/login' && method === 'post') {
+    const user = loadUsers().find((u) => u.email === String(body.email ?? '').toLowerCase() && u.password === body.password)
+    if (!user) fail(401, 'Email atau kata sandi salah')
+    return respond({ token: tokenFor(user!), user: publicUser(user!) })
+  }
+
+  // ---- Semua yang lain wajib membawa token
+  const bearer = String(cfg.headers?.get?.('Authorization') ?? '').replace(/^Bearer\s+/, '')
+  const me = loadUsers().find((u) => bearer === `mock.${u.id}`)
+  if (!me) fail(401, 'Token tidak valid atau kedaluwarsa')
+  const user = me!
+
+  if (path === '/auth/logout' && method === 'post') return respond(undefined, 204)
+  if (path === '/auth/me' && method === 'get') return respond(publicUser(user))
+  if (path === '/auth/me' && method === 'delete') {
+    if (body.password !== user.password) fail(403, 'Kata sandi salah')
+    saveUsers(loadUsers().filter((u) => u.id !== user.id))
+    localStorage.removeItem(dbKey(user.id))
+    return respond(undefined, 204)
+  }
+
+  // ---- Data milik pengguna
+  const db = load(user.id)
   if (path === '/settings/wa') {
-    if (method === 'put') { db.settings = { ...db.settings, ...body }; save(db) }
+    if (method === 'put') { db.settings = { ...db.settings, ...body }; save(user.id, db) }
     return respond(db.settings)
   }
-  if (path === '/finance/summary' && method === 'get') return respond(summarize(db, String(config.params?.month ?? dayjs().format('YYYY-MM'))))
-  const m = path.match(/^\/(tasks|transactions|bills)(?:\/([\w-]+))?$/)
-  if (!m) throw Object.assign(new Error('Not found'), { response: { status: 404 } })
-  const list = db[m[1] as 'tasks' | 'transactions' | 'bills'] as Row[]
+  if (path === '/finance/summary' && method === 'get') return respond(summarize(db, String(cfg.params?.month ?? dayjs().format('YYYY-MM'))))
+  const m = path.match(/^\/(tasks|transactions|bills|task-categories)(?:\/([\w-]+))?$/)
+  if (!m) fail(404, 'Not found')
+
+  // ---- Kategori tugas: nama unik (tanpa membedakan huruf besar/kecil), maks 20, tidak bisa dihapus bila dipakai tugas
+  if (m![1] === 'task-categories') {
+    const cats = db.taskCategories
+    if (method === 'get') return respond(cats)
+    if (method === 'post') {
+      const name = String(body.name ?? '').trim().replace(/\s+/g, ' ')
+      const tone = ['primary', 'secondary', 'tertiary', 'neutral'].includes(body.tone) ? body.tone : 'neutral'
+      if (name.length < 2 || name.length > 24) fail(400, 'Nama kategori 2-24 karakter')
+      if (name.toLowerCase() === 'semua') fail(400, 'Nama "Semua" tidak boleh dipakai')
+      if (cats.some((c) => String(c.name).toLowerCase() === name.toLowerCase())) fail(409, 'Kategori sudah ada')
+      if (cats.length >= MAX_TASK_CATEGORIES) fail(409, `Maksimal ${MAX_TASK_CATEGORIES} kategori`)
+      const row = { id: uid(), name, tone }
+      cats.push(row); save(user.id, db)
+      return respond(row, 201)
+    }
+    const ci = cats.findIndex((c) => c.id === m![2])
+    if (ci < 0) fail(404, 'Not found')
+    if (method === 'delete') {
+      const used = db.tasks.filter((t) => t.category === cats[ci].name).length
+      if (used > 0) fail(409, `Kategori masih dipakai ${used} tugas`)
+      cats.splice(ci, 1); save(user.id, db)
+      return respond(undefined, 204)
+    }
+    return fail(405, 'Method not allowed')
+  }
+
+  const list = db[m![1] as 'tasks' | 'transactions' | 'bills'] as Row[]
+  // Tugas wajib memakai kategori milik pengguna (dicek hanya bila field category dikirim)
+  if (m![1] === 'tasks' && (method === 'post' || method === 'patch') && body.category !== undefined &&
+    !db.taskCategories.some((c) => c.name === body.category)) fail(400, 'Kategori tidak ditemukan')
   if (method === 'get') {
-    if (m[1] !== 'transactions') return respond(list)
+    if (m![1] !== 'transactions') return respond(list)
     // Filter di "server": ?month=YYYY-MM&category=Makanan&q=kata
-    const { month, category, q } = config.params ?? {}
+    const { month, category, q } = cfg.params ?? {}
     const rows = list.filter((r) =>
       (!month || String(r.date).startsWith(month)) &&
       (!category || category === 'Semua' || r.category === category) &&
       (!q || `${r.description} ${r.category}`.toLowerCase().includes(String(q).toLowerCase())))
     return respond(rows.sort((a, b) => String(b.date).localeCompare(String(a.date))))
   }
-  if (method === 'post') { const row = { id: uid(), ...body }; list.unshift(row); save(db); return respond(row, 201) }
-  const i = list.findIndex((r) => r.id === m[2])
-  if (method === 'patch' && i >= 0) { list[i] = { ...list[i], ...body }; save(db); return respond(list[i]) }
-  if (method === 'delete' && i >= 0) { list.splice(i, 1); save(db); return respond({ ok: true }) }
-  throw Object.assign(new Error('Not found'), { response: { status: 404 } })
+  if (method === 'post') { const row = { id: uid(), ...body }; list.unshift(row); save(user.id, db); return respond(row, 201) }
+  const i = list.findIndex((r) => r.id === m![2])
+  if (i < 0) fail(404, 'Not found')
+  if (method === 'patch') { list[i] = { ...list[i], ...body }; save(user.id, db); return respond(undefined, 204) }
+  if (method === 'delete') { list.splice(i, 1); save(user.id, db); return respond(undefined, 204) }
+  return fail(405, 'Method not allowed')
 }

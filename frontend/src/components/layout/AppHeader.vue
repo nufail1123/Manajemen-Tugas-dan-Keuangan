@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { TabsRoot, TabsList, TabsTrigger } from 'reka-ui'
 import { CheckCircle2 } from 'lucide-vue-next'
+import UserMenu from './UserMenu.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -38,6 +39,7 @@ const active = computed({
           </TabsTrigger>
         </TabsList>
       </TabsRoot>
+      <div class="ml-auto"><UserMenu /></div>
     </div>
   </header>
 </template>

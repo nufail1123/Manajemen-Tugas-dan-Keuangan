@@ -10,4 +10,5 @@ type Bill struct {
 	RemindH3  bool      `gorm:"default:false" json:"remindH3"`
 	RemindH1  bool      `gorm:"default:false" json:"remindH1"`
 	CreatedAt time.Time `json:"-"`
+	UserID    string    `gorm:"type:char(36);index" json:"-"`
 }

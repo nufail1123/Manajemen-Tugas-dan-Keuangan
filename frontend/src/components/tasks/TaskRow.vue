@@ -4,10 +4,11 @@ import { Check, Link2, Pencil, Trash2, CalendarDays } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import Chip from '@/components/ui/Chip.vue'
 import WaChip from '@/components/ui/WaChip.vue'
-import { taskTone } from '@/lib/categories'
+import { useCategoryMeta } from '@/queries/categories'
 import { cn, fmtDate } from '@/lib/utils'
 import type { Task } from '@/types'
 
+const { toneOf } = useCategoryMeta()
 const props = defineProps<{ task: Task; readonly?: boolean }>()
 defineEmits<{ toggle: [done: boolean]; edit: []; remove: [] }>()
 
@@ -27,7 +28,7 @@ const host = () => { try { return new URL(props.task.url).host } catch { return 
       <div class="flex flex-col min-w-0">
         <div class="flex items-center gap-2">
           <span :class="cn('font-headline-sm text-body-lg font-medium text-on-surface truncate', task.done && 'line-through text-on-surface-variant')">{{ task.title }}</span>
-          <Chip :tone="taskTone[task.category] ?? 'neutral'">{{ task.category }}</Chip>
+          <Chip :tone="toneOf(task.category)">{{ task.category }}</Chip>
         </div>
         <span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5 truncate">{{ task.description }}</span>
       </div>

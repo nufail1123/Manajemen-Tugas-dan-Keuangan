@@ -1,3 +1,5 @@
+import type { Tone } from '@/lib/categories'
+
 export interface Task {
   id: string
   title: string
@@ -26,6 +28,7 @@ export interface Bill {
   remindH3: boolean
   remindH1: boolean
 }
+export interface TaskCategory { id: string; name: string; tone: Tone }
 export interface WaSettings { waNumber: string }
 
 export interface FinanceSummary {
@@ -41,3 +44,6 @@ export interface FinanceSummary {
   daily: { day: number; expense: number }[] // pengeluaran per tanggal
 }
 export interface TransactionFilter { month: string; category?: string; q?: string }
+
+export interface User { id: string; name: string; email: string }
+export interface AuthResponse { token: string; user: User }

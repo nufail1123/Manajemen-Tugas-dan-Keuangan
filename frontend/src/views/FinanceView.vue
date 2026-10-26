@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { ArrowDownLeft, ArrowUpRight, CalendarClock, CalendarDays, CirclePlus, Plus, Search, Send, Wallet } from 'lucide-vue-next'
+import { ArrowDownLeft, ArrowUpRight, CalendarClock, CalendarDays, CirclePlus, Plus, Send, Wallet } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import StatCard from '@/components/ui/StatCard.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
+import SearchInput from '@/components/ui/SearchInput.vue'
 import WaStatusCard from '@/components/ui/WaStatusCard.vue'
 import TransactionRow from '@/components/finance/TransactionRow.vue'
 import BillCard from '@/components/finance/BillCard.vue'
@@ -114,11 +115,7 @@ const dailyAvg = computed(() => {
             <BaseSelect v-model="month" :options="monthOptions" class="w-44 py-1.5" />
             <span class="text-on-surface-variant font-body-sm text-body-sm hidden sm:inline"><CalendarDays :size="14" class="inline -mt-0.5 text-primary" /> {{ visible.length }} transaksi ditampilkan</span>
           </div>
-          <div class="relative flex-1 md:max-w-xs">
-            <Search :size="18" class="absolute left-3 top-2.5 text-outline" />
-            <input v-model="txSearch" placeholder="Cari transaksi..."
-              class="w-full bg-surface-container rounded-lg pl-9 pr-3 py-1.5 font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-high transition-colors" />
-          </div>
+          <SearchInput v-model="txSearch" placeholder="Cari transaksi..." class="flex-1 md:max-w-xs" />
         </div>
 
         <div class="flex items-center gap-space-xs overflow-x-auto pb-1 scrollbar-none">

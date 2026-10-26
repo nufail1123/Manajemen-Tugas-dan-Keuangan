@@ -16,4 +16,5 @@ type Task struct {
 	NotifiedH1  bool      `gorm:"default:false" json:"-"`
 	CreatedAt   time.Time `json:"-"`
 	UpdatedAt   time.Time `json:"-"`
+	UserID      string    `gorm:"type:char(36);index" json:"-"`
 }

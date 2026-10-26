@@ -4,9 +4,20 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
-  resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
   server: {
-    // Saat VITE_USE_MOCK=false, request /api diteruskan ke backend Go
-    proxy: { '/api': { target: 'http://localhost:8080', changeOrigin: true } },
+    port: 5173,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8088',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 })

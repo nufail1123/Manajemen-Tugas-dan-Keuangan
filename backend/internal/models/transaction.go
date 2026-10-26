@@ -11,4 +11,5 @@ type Transaction struct {
 	Method      string    `gorm:"type:varchar(50)" json:"method"`
 	Date        string    `gorm:"type:varchar(30);not null" json:"date"` // ISO String
 	CreatedAt   time.Time `json:"-"`
+	UserID      string    `gorm:"type:char(36);index" json:"-"`
 }
