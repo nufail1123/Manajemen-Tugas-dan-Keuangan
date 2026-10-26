@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body { margin: 0; font-family: 'Geist Variable', sans-serif; background: #0b1326; }
+  body { overscroll-behavior: none; }
+  ::selection { background: #8083ff; color: #0d0096; }
+}
+@layer utilities {
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+}

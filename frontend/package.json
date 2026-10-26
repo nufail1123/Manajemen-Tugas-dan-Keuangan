@@ -1,0 +1,41 @@
+{
+  "name": "taskflow-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@internationalized/date": "^3.12.4",
+    "@tanstack/vue-query": "^5.104.5",
+    "@vee-validate/zod": "^4.15.1",
+    "axios": "^1.20.0",
+    "clsx": "^2.1.1",
+    "dayjs": "^1.11.23",
+    "lucide-vue-next": "^1.0.0",
+    "pinia": "^4.1.0",
+    "reka-ui": "^2.11.0",
+    "tailwind-merge": "^3.7.0",
+    "vee-validate": "^4.15.1",
+    "vue": "^3.5.44",
+    "vue-currency-input": "^3.2.2",
+    "vue-router": "^5.4.0",
+    "vue-sonner": "^2.0.9",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "autoprefixer": "^10.6.1",
+    "postcss": "^8.5.31",
+    "tailwindcss": "^3.4.19",
+    "typescript": "~5.9",
+    "vite": "^8.3.5",
+    "vue-tsc": "^3.3.13"
+  }
+}
