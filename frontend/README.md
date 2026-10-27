@@ -72,3 +72,9 @@ Warna & bayangan didefinisikan di `tailwind.config.js` (token `ink`, `accent`, `
 Animasi (`rise`, `pop`, `marquee`, `blink`, `grow-x`, `reveal-x`, `float`) ada di config yang sama; utilitas `.stagger`
 (muncul bergantian) ada di `src/style.css`. Semua animasi otomatis mati bila OS memakai "reduce motion".
 Font judul: Archivo (`npm install` sekali lagi karena ada dependensi baru `@fontsource-variable/archivo`).
+
+## reCAPTCHA (halaman Daftar)
+
+Isi `VITE_RECAPTCHA_SITE_KEY` di `.env` dengan **site key** reCAPTCHA v2 (kotak centang). Secret key hanya untuk backend
+(lihat `BACKEND-RECAPTCHA.md`). Mode mock tanpa site key menampilkan kotak centang palsu; token dikirim sebagai
+`recaptchaToken` pada `POST /api/auth/register`.

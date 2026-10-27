@@ -3,6 +3,9 @@ package handlers
 import (
 	"backend/internal/middleware"
 	"backend/internal/models"
+	"backend/internal/services"
+	"context"
+	"log"
 	"net/mail"
 	"strings"
 	"time"
@@ -41,19 +44,21 @@ func isValidEmail(email string) bool {
 // POST /api/auth/register
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	type RegisterReq struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Name           string `json:"name"`
+		Email          string `json:"email"`
+		Password       string `json:"password"`
+		RecaptchaToken string `json:"recaptchaToken"`
 	}
 
 	var req RegisterReq
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Payload invalid"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Data tidak lengkap"})
 	}
 
 	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
 	req.Name = strings.TrimSpace(req.Name)
 
+	// 1. Validasi field wajib
 	if req.Name == "" || req.Email == "" || len(req.Password) < 6 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Nama, email, dan kata sandi (minimal 6 karakter) wajib diisi"})
 	}
@@ -62,7 +67,29 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Format email tidak valid"})
 	}
 
-	// Cek duplikasi email
+	// 2. Validasi recaptchaToken
+	if strings.TrimSpace(req.RecaptchaToken) == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Verifikasi reCAPTCHA gagal, silakan coba lagi."})
+	}
+
+	// 3. Verifikasi ke Google dengan timeout context
+	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
+	defer cancel()
+
+	success, err := services.VerifyRecaptcha(ctx, req.RecaptchaToken, c.IP())
+	if err != nil {
+		log.Printf("[ERROR] Masalah verifikasi reCAPTCHA: %v", err)
+		return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{
+			"error": "Layanan verifikasi sedang bermasalah, coba beberapa saat lagi.",
+		})
+	}
+	if !success {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Verifikasi reCAPTCHA gagal, silakan coba lagi.",
+		})
+	}
+
+	// 4. Cek duplikasi email di database
 	var exists int64
 	h.DB.Model(&models.User{}).Where("email = ?", req.Email).Count(&exists)
 	if exists > 0 {
@@ -81,7 +108,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		PasswordHash: string(hashedPassword),
 	}
 
-	// Simpan user baru dan seed 5 kategori bawaan dalam satu transaksi
+	// 5. Simpan user baru dan seed 5 kategori bawaan dalam satu transaksi
 	err = h.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&newUser).Error; err != nil {
 			return err

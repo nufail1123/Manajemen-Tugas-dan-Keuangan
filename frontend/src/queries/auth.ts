@@ -15,8 +15,8 @@ export function useLogin() {
 export function useRegister() {
   const auth = useAuthStore()
   return useMutation({
-    // confirmPassword hanya untuk validasi di form, tidak dikirim
-    mutationFn: ({ confirmPassword: _c, ...body }: RegisterInput) =>
+    // confirmPassword hanya untuk validasi di form, tidak dikirim. recaptchaToken diverifikasi backend ke Google.
+    mutationFn: ({ confirmPassword: _c, ...body }: RegisterInput & { recaptchaToken: string }) =>
       api.post<AuthResponse>('/auth/register', body).then((r) => r.data),
     onSuccess: (res) => auth.setSession(res), // backend langsung mengembalikan token -> otomatis masuk
   })

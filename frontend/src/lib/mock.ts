@@ -101,8 +101,9 @@ export const mockAdapter: AxiosAdapter = async (config) => {
 
   // ---- Autentikasi (publik)
   if (path === '/auth/register' && method === 'post') {
-    const { name, email, password } = body
+    const { name, email, password, recaptchaToken } = body
     if (!name || !email || !password) fail(400, 'Data tidak lengkap')
+    if (!recaptchaToken) fail(400, 'Verifikasi reCAPTCHA gagal, silakan coba lagi.') // backend asli memverifikasi token ke Google
     const users = loadUsers()
     if (users.some((u) => u.email.toLowerCase() === String(email).toLowerCase())) fail(409, 'Email sudah terdaftar')
     const user: MockUser = { id: uid(), name, email: String(email).toLowerCase(), password }
