@@ -62,6 +62,7 @@ project1/
 │   └── go.mod
 ├── frontend/
 │   ├── src/                            # Antarmuka Vue 3 & state management
+|   ├── tools/                          # verifikasi API
 │   ├── .env                            # Variabel lingkungan frontend (VITE_API_URL, dll.)
 │   ├── package.json
 │   └── vite.config.ts                  # Konfigurasi port 5173 & reverse proxy /api
