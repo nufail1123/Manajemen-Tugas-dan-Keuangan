@@ -3,13 +3,13 @@ import { Check } from 'lucide-vue-next'
 </script>
 
 <template>
-  <footer class="w-full bg-surface-container-lowest py-8 mt-auto">
+  <footer class="w-full bg-primary text-white py-8 mt-auto border-t-2 border-ink">
     <div class="w-full px-margin-lg flex flex-col sm:flex-row items-center justify-between gap-space-sm">
       <div class="flex items-center gap-2">
-        <div class="w-4 h-4 rounded bg-primary-container flex items-center justify-center text-on-primary-container"><Check :size="10" /></div>
-        <span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">TaskFlow Cloud OS</span>
+        <div class="w-5 h-5 bg-accent text-ink border-2 border-ink flex items-center justify-center"><Check :size="12" :stroke-width="3" /></div>
+        <span class="font-label-sm text-label-sm text-accent tracking-widest uppercase font-bold">TaskFlow Cloud OS</span>
       </div>
-      <div class="font-body-sm text-body-sm text-on-surface-variant">© 2025 TaskFlow Inc. Precision workflow architecture.</div>
+      <div class="font-body-sm text-body-sm text-white/80">© 2025 TaskFlow Inc. Precision workflow architecture.</div>
     </div>
   </footer>
 </template>

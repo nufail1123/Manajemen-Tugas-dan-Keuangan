@@ -65,3 +65,10 @@ Uji otomatis (membuat akun uji, memeriksa semuanya, lalu menghapusnya): `node to
 ```
 
 Flag internal seperti `notified_h3` / `notified_h1` (apakah pesan sudah terkirim) cukup disimpan di database backend dan **tidak perlu** dikirim ke frontend. Frontend hanya mengirim `remindH3` dan `remindH1`.
+
+## Tema (neo-brutalist: persik, ungu, kuning, pink)
+
+Warna & bayangan didefinisikan di `tailwind.config.js` (token `ink`, `accent`, `primary`, bayangan `shadow-hard*`).
+Animasi (`rise`, `pop`, `marquee`, `blink`, `grow-x`, `reveal-x`, `float`) ada di config yang sama; utilitas `.stagger`
+(muncul bergantian) ada di `src/style.css`. Semua animasi otomatis mati bila OS memakai "reduce motion".
+Font judul: Archivo (`npm install` sekali lagi karena ada dependensi baru `@fontsource-variable/archivo`).

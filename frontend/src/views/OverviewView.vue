@@ -21,7 +21,7 @@ const openTasks = computed(() => (tasks.value ?? []).filter((t) => !t.done).sort
 <template>
   <PageHeader section="Ringkasan" title="Ringkasan" subtitle="Gambaran singkat tugas dan keuangan Anda hari ini." />
   <section class="w-full px-margin-lg py-space-lg">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter-lg">
+    <div class="stagger grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter-lg">
       <StatCard label="Tugas Aktif" :value="String(openTasks.length)" :icon="ListChecks" tone="primary"><span>menunggu diselesaikan</span></StatCard>
       <StatCard label="Saldo Bulan Ini" :value="rupiah(summary?.balance ?? 0)" :icon="Wallet" tone="secondary"><span>pemasukan - pengeluaran</span></StatCard>
       <StatCard label="Pengeluaran" :value="rupiah(summary?.expense ?? 0)" :icon="ArrowUpRight" tone="error"><span>bulan berjalan</span></StatCard>
@@ -34,7 +34,7 @@ const openTasks = computed(() => (tasks.value ?? []).filter((t) => !t.done).sort
         <h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Tugas Terdekat</h2>
         <RouterLink to="/tugas" class="font-label-sm text-label-sm text-primary hover:underline">Lihat semua</RouterLink>
       </div>
-      <div class="bg-surface-container-low rounded-xl shadow-sm overflow-hidden divide-y divide-surface-container/60">
+      <div class="stagger bg-white border-2 border-ink shadow-hard overflow-hidden divide-y-2 divide-ink">
         <TaskRow v-for="t in openTasks.slice(0, 4)" :key="t.id" :task="t" readonly @toggle="(done) => toggle.mutate({ id: t.id, done })" />
       </div>
     </div>

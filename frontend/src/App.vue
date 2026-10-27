@@ -7,10 +7,10 @@ import AppFooter from '@/components/layout/AppFooter.vue'
 <template>
   <!-- Halaman masuk/daftar tampil penuh tanpa header dan footer -->
   <RouterView v-if="$route.meta.guest" />
-  <div v-else class="min-h-screen flex flex-col bg-surface text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container">
+  <div v-else class="min-h-screen flex flex-col text-on-surface font-body-md">
     <AppHeader />
-    <main class="w-full pt-16 flex-1 flex flex-col"><RouterView /></main>
+    <main class="w-full pt-[66px] flex-1 flex flex-col"><RouterView /></main>
     <AppFooter />
   </div>
-  <Toaster theme="dark" position="bottom-right" rich-colors />
+  <Toaster theme="light" position="bottom-right" rich-colors />
 </template>

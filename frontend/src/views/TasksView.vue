@@ -15,7 +15,7 @@ import { useDeleteTask, useTasks, useToggleTask } from '@/queries'
 import { useUiStore, type TaskFilter } from '@/stores/ui'
 import { ALL_CATEGORIES } from '@/lib/categories'
 import { useCategoryMeta } from '@/queries/categories'
-import { btnPrimary } from '@/lib/styles'
+import { btnPrimary, pill, pillActive } from '@/lib/styles'
 import { cn } from '@/lib/utils'
 import type { Task } from '@/types'
 
@@ -83,7 +83,7 @@ const sortOptions = [{ value: 'due', label: 'Urut: Jatuh Tempo' }, { value: 'tit
   </PageHeader>
 
   <section class="w-full px-margin-lg py-space-lg">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter-lg">
+    <div class="stagger grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter-lg">
       <StatCard label="Total Tugas" :value="String(stats.total)" :icon="ListChecks" tone="primary"><span>{{ stats.pct }}% selesai</span></StatCard>
       <StatCard label="Terjadwal" :value="String(stats.open)" :icon="CalendarClock" tone="tertiary"><span>tugas aktif</span></StatCard>
       <StatCard label="Alert WhatsApp" :value="String(stats.wa)" :icon="MessageCircle" tone="secondary"><span>reminder aktif</span></StatCard>
@@ -94,7 +94,7 @@ const sortOptions = [{ value: 'due', label: 'Urut: Jatuh Tempo' }, { value: 'tit
   <section class="w-full px-margin-lg pb-16">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg">
       <div class="lg:col-span-8 flex flex-col gap-space-md">
-        <div class="bg-surface-container-low p-space-md rounded-xl shadow-sm flex flex-col md:flex-row gap-space-md justify-between md:items-center">
+        <div class="bg-white p-space-md border-2 border-ink shadow-hard flex flex-col md:flex-row gap-space-md justify-between md:items-center">
           <SearchInput v-model="taskSearch" placeholder="Cari tugas atau URL..." class="flex-1 md:max-w-xs" />
           <div class="flex flex-col sm:flex-row gap-space-sm">
             <BaseSelect v-model="taskCategory" :options="categoryOptions" class="sm:w-48 py-1.5" />
@@ -105,12 +105,12 @@ const sortOptions = [{ value: 'due', label: 'Urut: Jatuh Tempo' }, { value: 'tit
         <div class="flex items-center gap-space-xs overflow-x-auto pb-1 scrollbar-none">
           <button
             v-for="f in filters" :key="f.key" type="button" @click="taskFilter = f.key"
-            :class="cn('px-3 py-1 rounded-lg font-label-sm text-label-sm transition-colors whitespace-nowrap bg-surface-container-low text-on-surface-variant hover:text-on-surface hover:bg-surface-container',
-              taskFilter === f.key && 'bg-surface-container-high text-on-surface font-medium')"
-          >{{ f.label }} <span class="text-outline">{{ f.count }}</span></button>
+            :class="cn(pill,
+              taskFilter === f.key && pillActive)"
+          >{{ f.label }} <span class="opacity-60">{{ f.count }}</span></button>
         </div>
 
-        <div class="bg-surface-container-low rounded-xl shadow-sm overflow-hidden divide-y divide-surface-container/60">
+        <div class="stagger bg-white border-2 border-ink shadow-hard overflow-hidden divide-y-2 divide-ink">
           <div v-if="isLoading" class="p-space-lg text-center font-body-md text-on-surface-variant">Memuat tugas...</div>
           <div v-else-if="!visible.length" class="p-space-lg text-center font-body-md text-on-surface-variant">Tidak ada tugas pada filter ini.</div>
           <TaskRow

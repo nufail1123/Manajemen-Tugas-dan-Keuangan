@@ -43,7 +43,7 @@ const onSubmit = handleSubmit(async (v) => {
 <template>
   <AuthLayout title="Buat Akun" subtitle="Mulai kelola tugas dan keuangan Anda dengan pengingat WhatsApp.">
     <form class="flex flex-col gap-space-md" novalidate @submit.prevent="onSubmit">
-      <p v-if="serverError" class="rounded-lg bg-error-container/30 text-error px-3 py-2 font-body-sm text-body-sm">{{ serverError }}</p>
+      <p v-if="serverError" class="border-2 border-error bg-white text-error font-medium px-3 py-2 font-body-sm text-body-sm">{{ serverError }}</p>
       <FormField label="Nama Lengkap" :error="errors.name">
         <input v-model="name" autocomplete="name" placeholder="Nama Anda" :class="inputClass" />
       </FormField>

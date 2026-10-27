@@ -65,16 +65,16 @@ const onSubmit = handleSubmit(async (v) => {
     :title="editing ? 'Ubah Transaksi' : 'Catat Transaksi'" description="Data arus kas pada pembukuan pribadi"
   >
     <form class="p-space-lg flex flex-col gap-space-md" @submit.prevent="onSubmit">
-      <div class="flex p-1 bg-surface-container rounded-xl">
+      <div class="flex border-2 border-ink bg-white">
         <button
           type="button" @click="setType('expense')"
-          :class="cn('flex-1 py-2 rounded-lg font-body-sm text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-all text-on-surface-variant hover:text-on-surface',
-            type === 'expense' && 'bg-error-container/40 text-error shadow-sm hover:text-error')"
+          :class="cn('flex-1 py-2 font-label-md text-label-md font-bold tracking-wide flex items-center justify-center gap-1.5 transition-all text-on-surface hover:bg-accent/40',
+            type === 'expense' && 'bg-error text-white hover:bg-error')"
         ><ArrowUpRight :size="16" /> Pengeluaran</button>
         <button
           type="button" @click="setType('income')"
-          :class="cn('flex-1 py-2 rounded-lg font-body-sm text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-all text-on-surface-variant hover:text-on-surface',
-            type === 'income' && 'bg-secondary-container/30 text-secondary shadow-sm hover:text-secondary')"
+          :class="cn('flex-1 py-2 border-l-2 border-ink font-label-md text-label-md font-bold tracking-wide flex items-center justify-center gap-1.5 transition-all text-on-surface hover:bg-accent/40',
+            type === 'income' && 'bg-accent text-ink hover:bg-accent')"
         ><ArrowDownLeft :size="16" /> Pemasukan</button>
       </div>
       <FormField label="Nominal Transaksi (Rupiah)" :error="errors.amount"><CurrencyInput v-model="amount" /></FormField>

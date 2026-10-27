@@ -4,16 +4,16 @@ export type Tone = 'primary' | 'secondary' | 'tertiary' | 'neutral'
 
 // Class ditulis utuh agar terdeteksi Tailwind (jangan dibuat dinamis dengan template string)
 export const chipTone: Record<Tone, string> = {
-  primary: 'bg-primary-container/20 text-primary',
-  secondary: 'bg-secondary-container/20 text-secondary',
-  tertiary: 'bg-tertiary-container/20 text-tertiary',
-  neutral: 'bg-surface-container text-on-surface-variant',
+  primary: 'bg-primary text-white border-ink',
+  secondary: 'bg-ink text-accent border-ink',
+  tertiary: 'bg-tertiary-container text-ink border-ink',
+  neutral: 'bg-white text-ink border-ink',
 }
 export const iconTone: Record<Tone, string> = {
-  primary: 'bg-surface-container-high text-primary',
-  secondary: 'bg-secondary-container/20 text-secondary',
-  tertiary: 'bg-surface-container-high text-tertiary',
-  neutral: 'bg-surface-container-high text-on-surface-variant',
+  primary: 'bg-primary text-white border-2 border-ink',
+  secondary: 'bg-accent text-ink border-2 border-ink',
+  tertiary: 'bg-tertiary-container text-ink border-2 border-ink',
+  neutral: 'bg-surface-container-high text-ink border-2 border-ink',
 }
 
 export interface TxCategory { value: string; label: string; icon: LucideIcon; tone: Tone }
@@ -37,7 +37,7 @@ export const defaultTaskCategories: { name: string; tone: Tone }[] = [
 export const categoryTones: Tone[] = ['primary', 'secondary', 'tertiary', 'neutral']
 // Warna titik pada pemilih warna (class utuh agar terdeteksi Tailwind)
 export const toneDot: Record<Tone, string> = {
-  primary: 'bg-primary', secondary: 'bg-secondary', tertiary: 'bg-tertiary', neutral: 'bg-outline',
+  primary: 'bg-primary', secondary: 'bg-ink', tertiary: 'bg-tertiary-container', neutral: 'bg-white',
 }
 export const MAX_TASK_CATEGORIES = 20
 export const ALL_CATEGORIES = 'Semua' // nilai filter "semua kategori" -> nama ini tidak boleh dipakai kategori

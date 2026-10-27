@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Check, Plus, Tags, X } from 'lucide-vue-next'
+import { Plus, Tags, X } from 'lucide-vue-next'
 import Chip from '@/components/ui/Chip.vue'
 import { categoryTones, MAX_TASK_CATEGORIES, toneDot, type Tone } from '@/lib/categories'
 import { taskCategorySchema } from '@/lib/schemas'
@@ -41,31 +41,31 @@ const del = (c: { id: string; name: string; count: number }) => {
 </script>
 
 <template>
-  <div class="bg-surface-container-low p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+  <div class="bg-white p-space-lg border-2 border-ink shadow-hard transition-all duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg flex flex-col gap-space-md">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-primary-container/20 text-primary flex items-center justify-center"><Tags :size="18" /></div>
+        <div class="w-8 h-8 bg-primary text-white border-2 border-ink flex items-center justify-center"><Tags :size="18" /></div>
         <div class="flex flex-col">
-          <span class="font-headline-sm text-body-md font-semibold text-on-surface">Kategori Tugas</span>
+          <span class="font-headline-sm text-body-md font-bold text-on-surface">Kategori Tugas</span>
           <span class="font-label-sm text-label-sm text-on-surface-variant">Dipakai di form tugas &amp; filter</span>
         </div>
       </div>
-      <span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">{{ owned.length }}/{{ MAX_TASK_CATEGORIES }}</span>
+      <span class="font-label-sm text-label-sm px-2 py-0.5 border-2 border-ink bg-accent text-ink font-bold">{{ owned.length }}/{{ MAX_TASK_CATEGORIES }}</span>
     </div>
 
     <div v-if="isLoading" class="font-body-sm text-body-sm text-on-surface-variant">Memuat kategori...</div>
     <div v-else-if="!categories.length" class="font-body-sm text-body-sm text-on-surface-variant">Belum ada kategori. Tambahkan yang pertama di bawah.</div>
     <ul v-else class="flex flex-wrap gap-space-sm">
       <li v-for="c in categories" :key="c.id || c.name" class="group/chip inline-flex items-center gap-1">
-        <Chip :tone="c.tone">{{ c.name }}<span class="ml-1.5 text-outline">{{ c.count }}</span></Chip>
+        <Chip :tone="c.tone">{{ c.name }}<span class="ml-1.5 opacity-60">{{ c.count }}</span></Chip>
         <button
           v-if="!c.extra" type="button" :aria-label="`Hapus kategori ${c.name}`" :disabled="remove.isPending.value" @click="del(c)"
-          class="rounded p-0.5 text-outline opacity-60 hover:opacity-100 hover:text-error hover:bg-error-container/20 focus-visible:opacity-100 transition-all"
+          class="p-0.5 border-2 border-transparent text-on-surface opacity-60 hover:opacity-100 hover:bg-error hover:text-white hover:border-ink focus-visible:opacity-100 transition-all"
         ><X :size="12" /></button>
       </li>
     </ul>
 
-    <form class="flex flex-col gap-space-sm pt-space-sm border-t border-surface-container" @submit.prevent="add">
+    <form class="flex flex-col gap-space-sm pt-space-sm border-t-2 border-ink" @submit.prevent="add">
       <div class="flex gap-space-sm">
         <input v-model="name" maxlength="24" :disabled="full" :placeholder="full ? 'Batas kategori tercapai' : 'Nama kategori baru...'"
           :class="cn(inputClass, 'py-2 font-body-sm text-body-sm', error && 'ring-1 ring-error/60')" @input="error = ''" />
@@ -75,8 +75,7 @@ const del = (c: { id: string; name: string; count: number }) => {
       <div class="flex items-center gap-2" role="radiogroup" aria-label="Warna kategori">
         <span class="font-label-sm text-label-sm text-on-surface-variant mr-1">Warna</span>
         <button v-for="t in categoryTones" :key="t" type="button" role="radio" :aria-checked="tone === t" :aria-label="toneLabel[t]" :title="toneLabel[t]" @click="tone = t"
-          :class="cn('w-5 h-5 rounded-full flex items-center justify-center transition-all ring-offset-2 ring-offset-surface-container-low', toneDot[t], tone === t ? 'ring-2 ring-on-surface-variant' : 'opacity-60 hover:opacity-100')">
-          <Check v-if="tone === t" :size="12" class="text-surface" />
+          :class="cn('w-5 h-5 rounded-full transition-all ring-offset-2 ring-offset-white', 'border-2 border-ink', toneDot[t], tone === t ? 'ring-2 ring-ink scale-110' : 'hover:scale-110')">
         </button>
       </div>
     </form>

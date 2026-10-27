@@ -10,14 +10,14 @@ const model = defineModel<string>({ default: '' })
 
 <template>
   <div :class="cn('group relative', $props.class)">
-    <Search :size="16" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-outline transition-colors group-focus-within:text-primary" />
+    <Search :size="16" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-on-surface transition-colors group-focus-within:text-primary" />
     <input
       v-model="model" type="text" :placeholder="placeholder ?? 'Cari...'" :aria-label="placeholder ?? 'Cari'"
-      class="h-8 w-full rounded-lg bg-surface-container pl-9 pr-8 font-body-sm text-body-sm leading-none text-on-surface placeholder:text-outline focus:bg-surface-container-high focus:outline-none transition-colors"
+      class="h-9 w-full border-2 border-ink bg-white pl-9 pr-8 font-body-sm text-body-sm leading-none text-on-surface placeholder:text-outline focus:outline-none focus:shadow-hard-sm focus:-translate-x-px focus:-translate-y-px transition-all"
     />
     <button
       v-if="model" type="button" aria-label="Hapus pencarian" @click="model = ''"
-      class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-outline hover:text-on-surface transition-colors"
+      class="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-on-surface-variant hover:bg-accent hover:text-on-surface transition-colors"
     ><X :size="14" /></button>
   </div>
 </template>
