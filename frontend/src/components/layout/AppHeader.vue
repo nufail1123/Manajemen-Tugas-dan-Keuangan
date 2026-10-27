@@ -26,7 +26,7 @@ const active = computed({
         <div class="w-9 h-9 bg-primary text-white border-2 border-ink shadow-hard-sm flex items-center justify-center transition-transform group-hover:-rotate-6 group-hover:scale-105">
           <CheckCircle2 :size="20" class="group-hover:animate-wiggle" />
         </div>
-        <span class="font-headline-md text-xl font-extrabold tracking-[-0.03em] text-ink">TaskFlow</span>
+        <span class="font-headline-md text-xl font-extrabold tracking-[-0.03em] text-ink">TugasKu</span>
       </div>
       <div class="h-6 w-0.5 bg-ink hidden sm:block" />
       <TabsRoot v-model="active">

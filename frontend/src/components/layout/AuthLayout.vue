@@ -12,7 +12,7 @@ defineProps<{ title: string; subtitle: string }>()
     <div class="relative w-full max-w-md flex flex-col gap-space-lg">
       <div class="flex items-center justify-center gap-space-sm animate-rise">
         <div class="w-10 h-10 bg-primary text-white border-2 border-ink shadow-hard-sm flex items-center justify-center"><CheckCircle2 :size="22" /></div>
-        <span class="font-headline-md text-2xl font-extrabold tracking-[-0.03em] text-ink">TaskFlow</span>
+        <span class="font-headline-md text-2xl font-extrabold tracking-[-0.03em] text-ink">TugasKu</span>
       </div>
       <div class="bg-white border-2 border-ink shadow-hard-xl p-space-xl flex flex-col gap-space-lg animate-rise [animation-delay:100ms]">
         <div class="flex flex-col gap-1">
