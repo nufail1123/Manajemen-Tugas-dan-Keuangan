@@ -55,11 +55,14 @@ project1/
 │   │   │   └── user.go                 # Model user & kredensial bcrypt
 │   │   └── services/
 │   │       ├── scheduler.go            # Cron job pengingat H-3 & H-1 per user
+|   |       ├── recaptcha.go            # Captcha
 │   │       └── whatsapp.go             # Gateway integrasi WhatsApp
 │   ├── Dockerfile
+|   ├── .env
 │   └── go.mod
 ├── frontend/
 │   ├── src/                            # Antarmuka Vue 3 & state management
+|   ├── tools/                          # verifikasi API
 │   ├── .env                            # Variabel lingkungan frontend (VITE_API_URL, dll.)
 │   ├── package.json
 │   └── vite.config.ts                  # Konfigurasi port 5173 & reverse proxy /api
@@ -247,6 +250,7 @@ Pastikan file `frontend/.env` telah terkonfigurasi dengan benar:
 ```env
 VITE_USE_MOCK=false
 VITE_API_URL=/api
+VITE_RECAPTCHA_SITE_KEY=
 ```
 *(Dev server Vite diatur mem-proxy `/api` ke backend Go di `http://127.0.0.1:8088`)*.
 
