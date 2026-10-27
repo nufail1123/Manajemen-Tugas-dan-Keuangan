@@ -8,7 +8,7 @@ TaskFlow adalah aplikasi web manajemen tugas (*task management*) dan pelacak keu
 
 ### Backend
 * **Bahasa Pemrograman:** Go (Golang)
-* **Web Framework:** [Go Fiber v2](https://gofiber.io/)
+* **Web Framework:** [Go Fiber v3](https://gofiber.io/)
 * **ORM:** [GORM](https://gorm.io/)
 * **Database Driver:** MySQL Driver for GORM
 * **Autentikasi & Keamanan:** `golang-jwt/jwt/v5` (HMAC-SHA256) & `golang.org/x/crypto/bcrypt`
