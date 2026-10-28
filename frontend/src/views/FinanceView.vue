@@ -162,7 +162,13 @@ const dailyAvg = computed(() => {
             <span class="font-label-sm text-label-sm px-2 py-0.5 border-2 border-ink bg-accent text-ink font-bold">{{ bills?.length ?? 0 }} Aktif</span>
           </div>
           <div class="flex flex-col gap-space-sm">
-            <BillCard v-for="b in bills" :key="b.id" :bill="b" @edit="openBill(b)" @remove="removeBill.mutate(b.id)" />
+            <BillCard
+              v-for="b in bills"
+              :key="b.id"
+              :bill="b"
+              show-delete
+              @delete="removeBill.mutate(b.id)"
+            />
           </div>
           <button type="button" :class="cn(btnSecondary, 'w-full py-2.5')" @click="openBill()"><Plus :size="18" /> Tambah Tagihan Terjadwal</button>
         </div>
